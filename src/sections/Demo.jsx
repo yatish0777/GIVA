@@ -1,36 +1,49 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Maximize2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ExternalLink, Store, Factory, MonitorSmartphone } from 'lucide-react'
 import { Section } from '../components/Section'
-import { Tabs } from '../components/ui'
-import Mvp from '../mvp/Mvp'
+import { useLang } from '../i18n'
 import { QuickDemo } from './LiveDemo'
 
 export default function Demo() {
-  const [mode, setMode] = useState('mvp')
+  const { t, lang } = useLang()
+  const href = role => `/app?role=${role}&lang=${lang}`
   return (
-    <Section id="demo" kicker="🔴 Live MVP · real database" title="Khud try karo — working MVP"
-      lead="Buyer ya Seller bano. Invoice banao, accept / reject / modify karo, bill maango, stock aur GST returns dekho. Sab Supabase mein save hota hai aur real-time update hota hai.">
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <Tabs value={mode} onChange={setMode} tabs={[{ id: 'mvp', label: '🧩 Full MVP' }, { id: 'quick', label: '⚡ 2-phone quick demo' }]} />
-        <Link to="/app" className="btn-ghost ml-auto"><Maximize2 size={16} />Open full screen</Link>
+    <Section id="demo" kicker={t('demo.kicker')} title={t('demo.title')} lead={t('demo.lead')}>
+      <div className="grid gap-5 md:grid-cols-2">
+        {[['buyer', Store, 'from-accent to-[#f6a14d]'], ['seller', Factory, 'from-brand to-[#3b5be0]']].map(([role, Icon, grad], i) => (
+          <motion.a key={role} href={href(role)} target="_blank" rel="noopener"
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} whileHover={{ y: -4 }}
+            className={`group relative overflow-hidden rounded-3xl bg-gradient-to-br ${grad} p-6 text-white shadow-xl`}>
+            <div className="flex items-start justify-between">
+              <span className="rounded-2xl bg-white/20 p-3"><Icon size={26} /></span>
+              <ExternalLink size={20} className="opacity-80 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </div>
+            <div className="mt-5 font-display text-2xl font-bold">{t(`demo.${role}Title`)}</div>
+            <div className="mt-1 text-white/85">{t(`demo.${role}Sub`)}</div>
+            <div className="mt-4 text-xs font-semibold uppercase tracking-wider text-white/70">{t('common.newTab')} ↗</div>
+          </motion.a>
+        ))}
       </div>
-      {mode === 'mvp' ? (
-        <>
-          <Mvp />
-          <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
-            {[['1', 'Seller → New invoice', 'Bill turant buyer ke inbox mein + GST portal par (simulated)'],
-              ['2', 'Buyer → open bill → Modify', '10 pipes kam? Sirf woh galti bhejo, poora bill reject nahi'],
-              ['3', 'Seller → Approve', 'Credit note auto, stock update, GSTR-1 / 2B ready']].map(([n, t, s]) => (
-              <div key={n} className="flex gap-3 rounded-2xl bg-canvas p-4">
-                <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-xs font-bold text-white">{n}</span>
-                <div><div className="font-semibold">{t}</div><div className="text-muted">{s}</div></div>
-              </div>
-            ))}
+
+      <div className="mt-5 flex items-start gap-3 rounded-2xl border border-brand/20 bg-brand-soft p-4 text-sm">
+        <MonitorSmartphone className="mt-0.5 flex-none text-brand" size={20} />
+        <div>{t('demo.bothTip')}</div>
+      </div>
+
+      <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
+        {t('demo.steps').map(([title, sub], i) => (
+          <div key={i} className="flex gap-3 rounded-2xl bg-canvas p-4">
+            <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-xs font-bold text-white">{i + 1}</span>
+            <div><div className="font-semibold">{title}</div><div className="text-muted">{sub}</div></div>
           </div>
-          <p className="mt-3 text-xs text-muted">Tip: page ko do tabs (ya phone + laptop) mein kholo — ek mein Buyer, doosre mein Seller. Actions turant dono taraf dikhenge.</p>
-        </>
-      ) : <QuickDemo />}
+        ))}
+      </div>
+
+      <div className="mt-16 mb-6">
+        <h3 className="text-2xl font-bold">{t('demo.quickTitle')}</h3>
+        <p className="mt-1 text-muted">{t('demo.quickSub')}</p>
+      </div>
+      <QuickDemo />
     </Section>
   )
 }

@@ -10,7 +10,7 @@ A PBL project website that explains (with animations) and demonstrates (with a l
 | Hero | Animated: scattered tools (WhatsApp, GST portal, Tally…) merge into one app |
 | Problem | ABC Pipes ₹1 lakh example — the 7 separate steps a buyer does today |
 | How it works | Step 1 invoice import & reading · Step 2 GST match (click Match / Mismatch / Missing) · Step 3 100 vs 90 pipes dispute · Step 4 dashboard |
-| **Live MVP** | A working buyer/seller app inside the page (also full screen at `/app`) + a 2-phone quick demo. Every action is saved in Supabase and updates in real time |
+| **Live MVP** | "Open as Buyer" / "Open as Seller" open the full MVP in a **new tab** (`/app?role=buyer` or `/app?role=seller`) + a 2-phone quick demo on the page. Every action is saved in Supabase and updates in real time |
 | Main idea & USP | "Ask to change" instead of rejecting the whole invoice |
 | Built for Bharat | WhatsApp-first, UPI, MSME 45-day tracker, local languages… |
 | Contact | Feedback form saved to Supabase |
@@ -25,7 +25,10 @@ A PBL project website that explains (with animations) and demonstrates (with a l
 
 > GST portal actions are **simulated** — a real connection needs a registered GST Suvidha Provider (GSP).
 
-## MVP features (Live MVP section / `/app`)
+## Languages
+The whole website and MVP are available in **English, हिंदी and मराठी** (switcher in the top bar). The choice is remembered and shared across open tabs; `?lang=hi` / `?lang=mr` in the URL also works. Status-history events coming from the database are translated too. Translations live in `src/i18n/` (`en.js`, `hi.js`, `mr.js`).
+
+## MVP features (`/app`, opens in a new tab)
 | Problem-statement service | In the MVP |
 |---|---|
 | B2B invoice auto-sent to buyer, who can accept / reject / **modify** | Seller → *New invoice* (PVC items, GST, CGST/SGST or IGST) → appears instantly in buyer inbox. Buyer: Accept, Pending, Reject (reason), **Modify** (quantity / damaged / rate / GST issue) |

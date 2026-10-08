@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, CheckCircle2, XCircle, AlertTriangle, Building2, User, Cpu } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { APP_NAME, STATUS, gstCheck, inr, timeAgo } from '../lib/format'
+import { APP_NAME, STATUS, gstCheck, inr } from '../lib/format'
+import { useLang } from '../i18n'
 
 export function Logo({ light = false }) {
   return (
@@ -26,26 +27,29 @@ export function Chip({ tone = 'muted', children, className = '' }) {
 }
 
 export function StatusChip({ status }) {
-  const s = STATUS[status] || { label: status, tone: 'muted' }
+  const { t } = useLang()
+  const s = STATUS[status] ? { ...STATUS[status], label: t(`status.${status}`) } : { label: status, tone: 'muted' }
   const dot = { ok: '🟢', bad: '🔴', warn: '🟡', accent: '🟠', brand: '🔵', muted: '⚪' }[s.tone]
   return <Chip tone={s.tone}><span className="text-[9px]">{dot}</span>{s.label}</Chip>
 }
 
 export function GstChip({ invoice }) {
+  const { t } = useLang()
   const c = gstCheck(invoice)
-  if (c === 'match') return <Chip tone="ok"><CheckCircle2 size={12} />GST match</Chip>
-  if (c === 'mismatch') return <Chip tone="bad"><XCircle size={12} />Amount mismatch</Chip>
-  return <Chip tone="warn"><AlertTriangle size={12} />Not on GST</Chip>
+  if (c === 'match') return <Chip tone="ok"><CheckCircle2 size={12} />{t('gst.match')}</Chip>
+  if (c === 'mismatch') return <Chip tone="bad"><XCircle size={12} />{t('gst.mismatch')}</Chip>
+  return <Chip tone="warn"><AlertTriangle size={12} />{t('gst.missing')}</Chip>
 }
 
 export function LiveDot({ live }) {
+  const { t } = useLang()
   return (
-    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${live ? 'text-ok' : 'text-muted'}`} title={live ? 'Real-time updates on' : 'Connecting…'}>
+    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${live ? 'text-ok' : 'text-muted'}`} title={live ? t('common.liveTip') : t('common.connecting')}>
       <span className="relative flex h-2 w-2">
         {live && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok opacity-60" />}
         <span className={`relative inline-flex h-2 w-2 rounded-full ${live ? 'bg-ok' : 'bg-muted'}`} />
       </span>
-      {live ? 'Live' : 'Connecting'}
+      {live ? t('common.live') : t('common.connecting')}
     </span>
   )
 }
@@ -111,7 +115,8 @@ const actorIcon = { seller: Building2, buyer: User, system: Cpu }
 const actorTone = { seller: 'bg-brand text-white', buyer: 'bg-accent text-white', system: 'bg-ink text-white' }
 
 export function Timeline({ events }) {
-  if (!events.length) return <p className="text-sm text-muted">No activity yet.</p>
+  const { t, ev, ago } = useLang()
+  if (!events.length) return <p className="text-sm text-muted">{t('timeline.empty')}</p>
   return (
     <ol className="relative space-y-4 pl-1">
       {events.map((e, idx) => {
@@ -121,9 +126,9 @@ export function Timeline({ events }) {
             {idx < events.length - 1 && <span className="absolute left-[13px] top-7 h-[calc(100%+4px)] w-0.5 bg-line" />}
             <span className={`relative z-[1] flex h-7 w-7 flex-none items-center justify-center rounded-full ${actorTone[e.actor]}`}><Icon size={14} /></span>
             <div className="min-w-0 pt-0.5">
-              <div className="text-sm font-semibold">{e.event}</div>
-              {e.detail && <div className="text-sm text-muted">{e.detail}</div>}
-              <div className="mt-0.5 text-xs text-muted"><span className="capitalize">{e.actor}</span> · {timeAgo(e.created_at)}</div>
+              <div className="text-sm font-semibold">{ev(e.event)}</div>
+              {e.detail && <div className="text-sm text-muted">{ev(e.detail)}</div>}
+              <div className="mt-0.5 text-xs text-muted">{t(`actor.${e.actor}`)} · {ago(e.created_at)}</div>
             </div>
           </motion.li>
         )
@@ -133,16 +138,17 @@ export function Timeline({ events }) {
 }
 
 export function ItemsTable({ items, invoice }) {
+  const { t } = useLang()
   return (
     <div className="overflow-hidden rounded-xl border border-line">
       <table className="w-full text-sm">
         <thead className="bg-canvas text-left text-xs text-muted">
-          <tr><th className="px-3 py-2 font-semibold">Item</th><th className="px-3 py-2 text-right font-semibold">Qty</th><th className="px-3 py-2 text-right font-semibold">Rate</th><th className="px-3 py-2 text-right font-semibold">Amount</th></tr>
+          <tr><th className="px-3 py-2 font-semibold">{t('items.item')}</th><th className="px-3 py-2 text-right font-semibold">{t('items.qty')}</th><th className="px-3 py-2 text-right font-semibold">{t('items.rate')}</th><th className="px-3 py-2 text-right font-semibold">{t('items.amount')}</th></tr>
         </thead>
         <tbody>
           {items.map(it => (
             <tr key={it.id} className="border-t border-line">
-              <td className="px-3 py-2"><div className="font-medium">{it.description}</div><div className="text-xs text-muted">HSN {it.hsn}</div></td>
+              <td className="px-3 py-2"><div className="font-medium">{it.description}</div><div className="text-xs text-muted">{t('items.hsn')} {it.hsn}</div></td>
               <td className="px-3 py-2 text-right">{Number(it.qty)} {it.unit}</td>
               <td className="px-3 py-2 text-right">{inr(it.rate)}</td>
               <td className="px-3 py-2 text-right font-semibold">{inr(it.amount)}</td>
@@ -150,9 +156,9 @@ export function ItemsTable({ items, invoice }) {
           ))}
         </tbody>
         <tfoot className="border-t border-line bg-canvas/60 text-sm">
-          <tr><td colSpan={3} className="px-3 py-1.5 text-right text-muted">Taxable value</td><td className="px-3 py-1.5 text-right">{inr(invoice.taxable_value)}</td></tr>
-          <tr><td colSpan={3} className="px-3 py-1.5 text-right text-muted">GST @ {Number(invoice.gst_rate)}%</td><td className="px-3 py-1.5 text-right">{inr(invoice.gst_amount)}</td></tr>
-          <tr><td colSpan={3} className="px-3 py-2 text-right font-bold">Invoice total</td><td className="px-3 py-2 text-right font-bold text-brand">{inr(invoice.total)}</td></tr>
+          <tr><td colSpan={3} className="px-3 py-1.5 text-right text-muted">{t('items.taxable')}</td><td className="px-3 py-1.5 text-right">{inr(invoice.taxable_value)}</td></tr>
+          <tr><td colSpan={3} className="px-3 py-1.5 text-right text-muted">{t('items.gstAt', { r: Number(invoice.gst_rate) })}</td><td className="px-3 py-1.5 text-right">{inr(invoice.gst_amount)}</td></tr>
+          <tr><td colSpan={3} className="px-3 py-2 text-right font-bold">{t('items.total')}</td><td className="px-3 py-2 text-right font-bold text-brand">{inr(invoice.total)}</td></tr>
         </tfoot>
       </table>
     </div>
@@ -160,11 +166,12 @@ export function ItemsTable({ items, invoice }) {
 }
 
 export function GstCheckCard({ invoice, children }) {
+  const { t } = useLang()
   const c = gstCheck(invoice)
   const cfg = {
-    match: { cls: 'border-ok/30 bg-ok-soft', icon: <CheckCircle2 className="text-ok" />, title: 'Matches GST portal', text: 'Amount reported in GSTR-1 is the same as the bill — buyer can claim GST credit.' },
-    mismatch: { cls: 'border-bad/30 bg-bad-soft', icon: <XCircle className="text-bad" />, title: 'Amount mismatch on GST portal', text: `Bill says ${inr(invoice.total)} but seller reported ${inr(invoice.gst_reported_total)} on GST.` },
-    missing: { cls: 'border-warn/30 bg-warn-soft', icon: <AlertTriangle className="text-warn" />, title: 'Not uploaded on GST portal', text: 'Seller has not reported this invoice yet, so you cannot claim GST credit on it.' },
+    match: { cls: 'border-ok/30 bg-ok-soft', icon: <CheckCircle2 className="text-ok" />, title: t('gst.matchTitle'), text: t('gst.matchText') },
+    mismatch: { cls: 'border-bad/30 bg-bad-soft', icon: <XCircle className="text-bad" />, title: t('gst.mismatchTitle'), text: t('gst.mismatchText', { bill: inr(invoice.total), portal: inr(invoice.gst_reported_total) }) },
+    missing: { cls: 'border-warn/30 bg-warn-soft', icon: <AlertTriangle className="text-warn" />, title: t('gst.missingTitle'), text: t('gst.missingText') },
   }[c]
   return (
     <div className={`rounded-2xl border p-4 ${cfg.cls}`}>
@@ -174,8 +181,8 @@ export function GstCheckCard({ invoice, children }) {
           <div className="font-semibold">{cfg.title}</div>
           <div className="text-sm text-ink/75">{cfg.text}</div>
           <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-lg bg-white/70 px-2.5 py-1.5"><div className="text-muted">Bill total</div><div className="font-bold">{inr(invoice.total)}</div></div>
-            <div className="rounded-lg bg-white/70 px-2.5 py-1.5"><div className="text-muted">On GST portal</div><div className="font-bold">{invoice.gst_reported_total == null ? '—' : inr(invoice.gst_reported_total)}</div></div>
+            <div className="rounded-lg bg-white/70 px-2.5 py-1.5"><div className="text-muted">{t('gst.billTotal')}</div><div className="font-bold">{inr(invoice.total)}</div></div>
+            <div className="rounded-lg bg-white/70 px-2.5 py-1.5"><div className="text-muted">{t('gst.onPortal')}</div><div className="font-bold">{invoice.gst_reported_total == null ? '—' : inr(invoice.gst_reported_total)}</div></div>
           </div>
           {children}
         </div>
