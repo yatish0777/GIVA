@@ -6,7 +6,7 @@ import { QuickDemo } from './LiveDemo'
 
 export default function Demo() {
   const { t, lang } = useLang()
-  const href = role => `/app?role=${role}&lang=${lang}`
+  const href = role => `/app/${role}?lang=${lang}`
   return (
     <Section id="demo" kicker={t('demo.kicker')} title={t('demo.title')} lead={t('demo.lead')}>
       <div className="grid gap-5 md:grid-cols-2">

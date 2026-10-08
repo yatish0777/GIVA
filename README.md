@@ -28,7 +28,12 @@ A PBL project website that explains (with animations) and demonstrates (with a l
 ## Languages
 The whole website and MVP are available in **English, हिंदी and मराठी** (switcher in the top bar). The choice is remembered and shared across open tabs; `?lang=hi` / `?lang=mr` in the URL also works. Status-history events coming from the database are translated too. Translations live in `src/i18n/` (`en.js`, `hi.js`, `mr.js`).
 
-## MVP features (`/app`, opens in a new tab)
+## MVP app (`/app`, opens in a new tab)
+- **Start screen:** choose *Buyer* or *Seller*, then pick a demo business (no password).
+- **Sidebar app per role:** Dashboard (KPIs, action center, demo script, monthly chart, status mix, top parties, GST compliance / ITC rings, activity feed) · Invoices · full **invoice page** (progress tracker, GST check, parties, items, actions, summary, timeline) · printable **GST Tax Invoice** with simulated IRN + e-invoice QR + UPI QR · **New invoice** with live preview · Bill requests · Disputes / Corrections · Payments / Receivables (MSME 45-day tracker, UPI QR, reminders) · Credit/debit notes · GST returns · Suppliers / Customers (GST match score) · Inventory · Business profile.
+- **Top bar:** search, language switch, live status, notification bell (other party's actions), business switcher.
+
+### Features vs problem statement
 | Problem-statement service | In the MVP |
 |---|---|
 | B2B invoice auto-sent to buyer, who can accept / reject / **modify** | Seller → *New invoice* (PVC items, GST, CGST/SGST or IGST) → appears instantly in buyer inbox. Buyer: Accept, Pending, Reject (reason), **Modify** (quantity / damaged / rate / GST issue) |

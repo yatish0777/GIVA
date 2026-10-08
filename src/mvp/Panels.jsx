@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Search, Send, Loader2, Download, Package, FileText } from 'lucide-react'
@@ -19,11 +19,12 @@ const FILTERS = {
   gst: i => gstCheck(i) !== 'match',
 }
 
-export function InvoiceList({ role, business, onOpen }) {
+export function InvoiceList({ role, business, onOpen, initialQ = '', initialFilter = 'all' }) {
   const { t, fdate } = useLang()
   const d = useData()
-  const [filter, setFilter] = useState('all')
-  const [q, setQ] = useState('')
+  const [filter, setFilter] = useState(initialFilter)
+  const [q, setQ] = useState(initialQ)
+  useEffect(() => { setQ(initialQ) }, [initialQ])
   const mine = d.invoices.filter(i => role === 'buyer' ? i.buyer_id === business.id : i.seller_id === business.id)
   const rows = mine.filter(FILTERS[filter]).filter(i => {
     if (!q) return true

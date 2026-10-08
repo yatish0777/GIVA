@@ -1,3 +1,4 @@
+import appText from './app.hi.js'
 // हिंदी
 const hi = {
   langName: 'हिंदी',
@@ -283,4 +284,5 @@ const hi = {
 
   toast: { billRequested: '📩 बिल माँगा गया', billRequestedText: '{name} बिल माँग रहा है: {ref}' },
 }
+hi.app = appText
 export default hi

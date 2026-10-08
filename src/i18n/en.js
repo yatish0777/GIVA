@@ -1,3 +1,4 @@
+import appText from './app.en.js'
 // English — source of truth. hi.js and mr.js use the same keys.
 const en = {
   langName: 'English',
@@ -284,4 +285,5 @@ const en = {
 
   toast: { billRequested: '📩 Bill requested', billRequestedText: '{name} is asking for a bill: {ref}' },
 }
+en.app = appText
 export default en

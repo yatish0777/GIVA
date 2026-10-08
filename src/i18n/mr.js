@@ -1,3 +1,4 @@
+import appText from './app.mr.js'
 // मराठी
 const mr = {
   langName: 'मराठी',
@@ -283,4 +284,5 @@ const mr = {
 
   toast: { billRequested: '📩 बिल मागितले', billRequestedText: '{name} बिल मागत आहे: {ref}' },
 }
+mr.app = appText
 export default mr

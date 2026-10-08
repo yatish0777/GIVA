@@ -96,3 +96,63 @@ export function toCsv(rows) {
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }).join(',')).join('\n')
 }
+
+export const STATE_NAMES = {
+  '01': 'Jammu & Kashmir', '03': 'Punjab', '06': 'Haryana', '07': 'Delhi', '08': 'Rajasthan', '09': 'Uttar Pradesh',
+  '10': 'Bihar', '19': 'West Bengal', '23': 'Madhya Pradesh', '24': 'Gujarat', '27': 'Maharashtra', '29': 'Karnataka',
+  '30': 'Goa', '32': 'Kerala', '33': 'Tamil Nadu', '36': 'Telangana', '37': 'Andhra Pradesh',
+}
+export function stateOf(gstin) {
+  const c = gstin?.slice(0, 2)
+  return c ? `${STATE_NAMES[c] ?? 'State'} (${c})` : '—'
+}
+
+// Indian-system amount in words: 106200 -> "Rupees One Lakh Six Thousand Two Hundred Only"
+const ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen',
+  'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']
+const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + ONES[n % 10] : '') }
+function three(n) { return (n >= 100 ? ONES[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' : '') : '') + (n % 100 ? two(n % 100) : '') }
+export function amountInWords(amount) {
+  const v = Math.round(Number(amount || 0) * 100)
+  let r = Math.floor(v / 100); const p = v % 100
+  if (r === 0 && p === 0) return 'Rupees Zero Only'
+  const parts = []
+  const crore = Math.floor(r / 1e7); r %= 1e7
+  const lakh = Math.floor(r / 1e5); r %= 1e5
+  const thousand = Math.floor(r / 1e3); r %= 1e3
+  if (crore) parts.push(three(crore) + ' Crore')
+  if (lakh) parts.push(two(lakh) + ' Lakh')
+  if (thousand) parts.push(two(thousand) + ' Thousand')
+  if (r) parts.push(three(r))
+  return 'Rupees ' + (parts.join(' ') || 'Zero') + (p ? ' and ' + two(p) + ' Paise' : '') + ' Only'
+}
+
+// Deterministic fake 64-char IRN + ack no (real IRN comes from the IRP; simulated here)
+function h32(str, seed) {
+  let h = seed >>> 0
+  for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 2654435761); h = (h << 13) | (h >>> 19) }
+  return (h >>> 0).toString(16).padStart(8, '0')
+}
+export function fakeIrn(inv, sellerGstin) {
+  const s = `${sellerGstin}|${inv.invoice_no}|${inv.invoice_date}|${inv.id}`
+  return Array.from({ length: 8 }, (_, i) => h32(s, 0x9e3779b1 + i * 7919)).join('')
+}
+export function fakeAck(inv) {
+  return '1' + String(parseInt(h32(inv.id, 42), 16)).padStart(11, '0').slice(0, 11) + String(inv.invoice_no).replace(/\D/g, '').slice(-3)
+}
+
+export function daysBetween(a, b = new Date()) {
+  const d = (x) => { const t = new Date(x); return Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) }
+  return Math.round((d(a) - d(b)) / 86400000)
+}
+
+// last N months as 'YYYY-MM', oldest first
+export function lastMonths(n = 6) {
+  const out = []; const now = new Date()
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+  }
+  return out
+}

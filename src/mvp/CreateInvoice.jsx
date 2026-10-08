@@ -17,7 +17,7 @@ export const PRODUCTS = [
 
 const blankRow = () => ({ ...PRODUCTS[0], qty: 100 })
 
-export default function CreateInvoice({ seller, buyers, request, onDone, onCancel }) {
+export default function CreateInvoice({ seller, buyers, request, onDone, onCancel, onDraft }) {
   const { t } = useLang()
   const [buyerId, setBuyerId] = useState(request?.buyer_id ?? buyers[0]?.id ?? '')
   const [rows, setRows] = useState(() => request
@@ -32,6 +32,8 @@ export default function CreateInvoice({ seller, buyers, request, onDone, onCance
   const taxable = rows.reduce((s, r) => s + Number(r.qty || 0) * Number(r.rate || 0), 0)
   const gst = Math.round(taxable * gstRate) / 100
   const split = useMemo(() => taxSplit(seller.gstin, buyer?.gstin, gst), [seller.gstin, buyer?.gstin, gst])
+
+  useEffect(() => { onDraft?.({ buyerId, rows, gstRate, taxable, gst }) }, [buyerId, rows, gstRate, taxable, gst]) // eslint-disable-line
 
   const setRow = (i, patch) => setRows(rs => rs.map((r, j) => j === i ? { ...r, ...patch } : r))
 
@@ -64,23 +66,21 @@ export default function CreateInvoice({ seller, buyers, request, onDone, onCance
       {request && <div className="rounded-xl bg-accent-soft px-3 py-2 text-sm">{t('create.againstReq')} <b>{request.reference}</b></div>}
 
       <div className="space-y-2">
-        <div className="hidden grid-cols-[1fr_90px_110px_110px_36px] gap-2 px-1 text-xs font-semibold text-muted sm:grid">
-          <span>{t('create.item')}</span><span>{t('create.qty')}</span><span>{t('create.rate')}</span><span className="text-right">{t('create.amount')}</span><span />
-        </div>
         {rows.map((r, i) => (
-          <div key={i} className="grid grid-cols-2 gap-2 rounded-xl border border-line p-2 sm:grid-cols-[1fr_90px_110px_110px_36px] sm:border-0 sm:p-0">
-            <div className="col-span-2 sm:col-span-1">
-              <input list="giva-products" value={r.description} className="input" required maxLength={120}
+          <div key={i} className="grid grid-cols-[1fr_1fr_1fr_36px] gap-2 rounded-xl border border-line bg-canvas/40 p-3">
+            <div className="col-span-4">
+              <label className="label">{t('create.item')} {i + 1}</label>
+              <input list="giva-products" value={r.description} className="input" required maxLength={120} aria-label={t('create.item')}
                 onChange={e => {
                   const p = PRODUCTS.find(x => x.description === e.target.value)
                   setRow(i, p ? { ...p } : { description: e.target.value })
                 }} />
             </div>
-            <input type="number" min="1" step="1" value={r.qty} onChange={e => setRow(i, { qty: e.target.value })} className="input" required aria-label={t('create.qty')} />
-            <input type="number" min="0" step="0.01" value={r.rate} onChange={e => setRow(i, { rate: e.target.value })} className="input" required aria-label={t('create.rate')} />
-            <div className="flex items-center justify-end text-sm font-semibold">{inr(Number(r.qty || 0) * Number(r.rate || 0))}</div>
+            <div><label className="label">{t('create.qty')}</label><input type="number" min="1" step="1" value={r.qty} onChange={e => setRow(i, { qty: e.target.value })} className="input" required /></div>
+            <div><label className="label">{t('create.rate')}</label><input type="number" min="0" step="0.01" value={r.rate} onChange={e => setRow(i, { rate: e.target.value })} className="input" required /></div>
+            <div><label className="label text-right">{t('create.amount')}</label><div className="flex h-[42px] items-center justify-end text-sm font-semibold">{inr(Number(r.qty || 0) * Number(r.rate || 0))}</div></div>
             <button type="button" onClick={() => setRows(rs => rs.filter((_, j) => j !== i))} disabled={rows.length === 1}
-              className="flex items-center justify-center rounded-lg text-muted hover:bg-bad-soft hover:text-bad disabled:opacity-30 cursor-pointer" aria-label={t('create.remove')}><Trash2 size={16} /></button>
+              className="mt-5 flex h-[42px] items-center justify-center rounded-lg text-muted hover:bg-bad-soft hover:text-bad disabled:opacity-30 cursor-pointer" aria-label={t('create.remove')}><Trash2 size={16} /></button>
           </div>
         ))}
         <datalist id="giva-products">{PRODUCTS.map(p => <option key={p.description} value={p.description} />)}</datalist>

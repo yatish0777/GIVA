@@ -151,7 +151,7 @@ export default function InvoiceDrawer({ invoiceId, role, onClose }) {
   )
 }
 
-function DisputeText({ dispute: x, items }) {
+export function DisputeText({ dispute: x, items }) {
   const { t } = useLang()
   const it = items.find(i => i.id === x.item_id)
   return (
@@ -163,7 +163,7 @@ function DisputeText({ dispute: x, items }) {
   )
 }
 
-function DisputeForm({ inv, items, busy, run, onCancel }) {
+export function DisputeForm({ inv, items, busy, run, onCancel }) {
   const { t } = useLang()
   const [type, setType] = useState(gstCheck(inv) === 'mismatch' ? 'gst' : 'quantity')
   const [itemId, setItemId] = useState(items[0]?.id)
@@ -211,7 +211,7 @@ function DisputeForm({ inv, items, busy, run, onCancel }) {
   )
 }
 
-function RejectForm({ inv, busy, run, onCancel }) {
+export function RejectForm({ inv, busy, run, onCancel }) {
   const { t } = useLang()
   const [reason, setReason] = useState('')
   return (
@@ -225,7 +225,7 @@ function RejectForm({ inv, busy, run, onCancel }) {
   )
 }
 
-function NoteForm({ inv, busy, run, onCancel }) {
+export function NoteForm({ inv, busy, run, onCancel }) {
   const { t } = useLang()
   const [kind, setKind] = useState('credit')
   const [amount, setAmount] = useState('')
