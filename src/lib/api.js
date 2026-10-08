@@ -26,6 +26,7 @@ export const api = {
     p_buyer: p.buyerId, p_seller: p.sellerId, p_reference: p.reference, p_amount: p.amount ?? null, p_note: p.note ?? null,
   }),
   declineRequest: (id, note) => rpc('decline_request', { p_request: id, p_note: note ?? null }),
+  issueNote: (id, kind, taxable, reason) => rpc('issue_note', { p_invoice: id, p_kind: kind, p_taxable: taxable, p_reason: reason }),
   markPaid: (id) => rpc('mark_paid', { p_invoice: id }),
   submitFeedback: (p) => rpc('submit_feedback', {
     p_name: p.name, p_contact: p.contact, p_message: p.message, p_organisation: p.organisation || null, p_role: p.role,

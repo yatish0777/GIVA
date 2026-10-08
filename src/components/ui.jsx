@@ -162,7 +162,7 @@ export function ItemsTable({ items, invoice }) {
 export function GstCheckCard({ invoice, children }) {
   const c = gstCheck(invoice)
   const cfg = {
-    match: { cls: 'border-ok/30 bg-ok-soft', icon: <CheckCircle2 className="text-ok" />, title: 'Matches GST portal', text: 'Seller reported the same amount in GSTR-1. Safe to accept.' },
+    match: { cls: 'border-ok/30 bg-ok-soft', icon: <CheckCircle2 className="text-ok" />, title: 'Matches GST portal', text: 'Amount reported in GSTR-1 is the same as the bill — buyer can claim GST credit.' },
     mismatch: { cls: 'border-bad/30 bg-bad-soft', icon: <XCircle className="text-bad" />, title: 'Amount mismatch on GST portal', text: `Bill says ${inr(invoice.total)} but seller reported ${inr(invoice.gst_reported_total)} on GST.` },
     missing: { cls: 'border-warn/30 bg-warn-soft', icon: <AlertTriangle className="text-warn" />, title: 'Not uploaded on GST portal', text: 'Seller has not reported this invoice yet, so you cannot claim GST credit on it.' },
   }[c]

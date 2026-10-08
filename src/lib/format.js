@@ -64,3 +64,35 @@ export function friendlyError(e) {
   const msg = e?.message || String(e)
   return msg.replace(/^.*?ERROR:\s*/i, '')
 }
+
+// Net payable after credit (−) and debit (+) notes
+export function netPayable(inv, notes) {
+  const mine = notes.filter(n => n.invoice_id === inv.id)
+  const credit = mine.filter(n => (n.kind ?? 'credit') === 'credit').reduce((s, n) => s + Number(n.total), 0)
+  const debit = mine.filter(n => n.kind === 'debit').reduce((s, n) => s + Number(n.total), 0)
+  return Number(inv.total) - credit + debit
+}
+
+// Same state (first 2 digits of GSTIN) → CGST + SGST, else IGST
+export function taxSplit(sellerGstin, buyerGstin, gst) {
+  const g = Number(gst || 0)
+  if (sellerGstin?.slice(0, 2) === buyerGstin?.slice(0, 2)) return { cgst: g / 2, sgst: g / 2, igst: 0 }
+  return { cgst: 0, sgst: 0, igst: g }
+}
+
+export const STATE_CODES = { '24': 'Gujarat', '27': 'Maharashtra', '29': 'Karnataka', '07': 'Delhi' }
+
+export function downloadFile(name, content, type = 'application/json') {
+  const blob = new Blob([content], { type })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = name; a.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export function toCsv(rows) {
+  return rows.map(r => r.map(v => {
+    const s = String(v ?? '')
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }).join(',')).join('\n')
+}

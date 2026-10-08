@@ -10,7 +10,7 @@ A PBL project website that explains (with animations) and demonstrates (with a l
 | Hero | Animated: scattered tools (WhatsApp, GST portal, Tally…) merge into one app |
 | Problem | ABC Pipes ₹1 lakh example — the 7 separate steps a buyer does today |
 | How it works | Step 1 invoice import & reading · Step 2 GST match (click Match / Mismatch / Missing) · Step 3 100 vs 90 pipes dispute · Step 4 dashboard |
-| **Live demo** | Two phones side by side — **Buyer** (Shree Sai Hardware) and **Seller** (ABC Pipes). Every action is saved in Supabase and updates both phones in real time |
+| **Live MVP** | A working buyer/seller app inside the page (also full screen at `/app`) + a 2-phone quick demo. Every action is saved in Supabase and updates in real time |
 | Main idea & USP | "Ask to change" instead of rejecting the whole invoice |
 | Built for Bharat | WhatsApp-first, UPI, MSME 45-day tracker, local languages… |
 | Contact | Feedback form saved to Supabase |
@@ -24,6 +24,16 @@ A PBL project website that explains (with animations) and demonstrates (with a l
 6. Extra: dashboard rows INV-102 (amount mismatch) and INV-105 (not uploaded on GST), and **Ask for bill** when goods came without a bill
 
 > GST portal actions are **simulated** — a real connection needs a registered GST Suvidha Provider (GSP).
+
+## MVP features (Live MVP section / `/app`)
+| Problem-statement service | In the MVP |
+|---|---|
+| B2B invoice auto-sent to buyer, who can accept / reject / **modify** | Seller → *New invoice* (PVC items, GST, CGST/SGST or IGST) → appears instantly in buyer inbox. Buyer: Accept, Pending, Reject (reason), **Modify** (quantity / damaged / rate / GST issue) |
+| Lodge accept/reject with GST system | Every action is logged as "synced to GST IMS" (simulated); GST check shows Match / Amount mismatch / Not on GST |
+| Buyer can seek invoice not uploaded by seller | **Ask for bill** (buyer) → **Bill requests** (seller) → *Create bill* pre-filled & linked |
+| Inventory, credit / debit notes | Stock auto: seller stock-out on invoice, buyer stock-in on accept (minus short/damaged). Credit note auto on approved correction; seller can issue manual credit/debit notes |
+| Generate the return | Seller **GSTR-1** (B2B + CDNR) and buyer **GSTR-2B / 3B ITC** summary per month, download CSV / JSON |
+| Real-time status tracking | Live dashboard, filters, status chips, per-invoice timeline, toast alerts for the other party's actions |
 
 ## Tech stack
 - **Frontend:** React 18 + Vite + Tailwind CSS v4 + Framer Motion (animations) + lucide icons

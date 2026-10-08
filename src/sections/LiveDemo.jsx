@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Loader2, RotateCcw, Smartphone, Store, Factory, Send, Inbox, Bell, Upload, IndianRupee, Database } from 'lucide-react'
-import { Section } from '../components/Section'
 import { Chip, GstChip, LiveDot, StatusChip, Timeline } from '../components/ui'
 import { useData } from '../lib/data'
 import { api } from '../lib/api'
-import { DISPUTE_TYPES, friendlyError, gstCheck, inr, inrShort, timeAgo } from '../lib/format'
+import { DISPUTE_TYPES, netPayable, friendlyError, gstCheck, inr, inrShort, timeAgo } from '../lib/format'
 
 const SELLER_GSTIN = '27AABCA1234F1Z5' // ABC Pipes
 const BUYER_GSTIN = '27ABMPS9876Q1Z3' // Shree Sai Hardware
@@ -15,7 +14,7 @@ const LS_KEY = 'giva-demo-invoice'
 function readLS() { try { return localStorage.getItem(LS_KEY) } catch { return null } }
 function writeLS(v) { try { localStorage.setItem(LS_KEY, v) } catch { /* ignore */ } }
 
-export default function LiveDemo() {
+export function QuickDemo() {
   const d = useData()
   const seller = d.businesses.find(b => b.gstin === SELLER_GSTIN)
   const buyer = d.businesses.find(b => b.gstin === BUYER_GSTIN)
@@ -26,6 +25,7 @@ export default function LiveDemo() {
   const items = useMemo(() => inv ? d.items.filter(i => i.invoice_id === inv.id) : [], [d.items, inv])
   const openDispute = inv ? d.disputes.find(x => x.invoice_id === inv.id && x.status === 'open') : null
   const notes = inv ? d.creditNotes.filter(c => c.invoice_id === inv.id) : []
+  const net = inv ? netPayable(inv, d.creditNotes) : 0
   const history = inv ? d.history.filter(h => h.invoice_id === inv.id) : []
   const sellerOfInv = inv ? d.businesses.find(b => b.id === inv.seller_id) : null
   const buyerInvoices = buyer ? d.invoices.filter(i => i.buyer_id === buyer.id).slice(0, 7) : []
@@ -53,8 +53,7 @@ export default function LiveDemo() {
   }
 
   return (
-    <Section id="demo" kicker="🔴 Live demo · real database" title="Khud try karo: Buyer vs Seller"
-      lead="Left phone = tumhari shop (buyer). Right phone = ABC Pipes (seller). Har button real Supabase database mein save hota hai aur dono phones live update hote hain.">
+    <>
       {!d.loading && d.error && <div className="card mb-6 p-4 text-bad">Could not connect to the database: {d.error}</div>}
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -68,7 +67,7 @@ export default function LiveDemo() {
       <div id="demo-phones" className="grid scroll-mt-24 gap-8 lg:grid-cols-2">
         <Phone title={buyer?.name ?? 'Buyer'} role="Buyer · Tumhari shop" icon={<Store size={18} />} tone="accent">
           {d.loading ? <PhoneLoading /> : (
-            <BuyerScreen inv={inv} items={items} sellerName={sellerOfInv?.name} openDispute={openDispute} notes={notes}
+            <BuyerScreen inv={inv} items={items} sellerName={sellerOfInv?.name} openDispute={openDispute} notes={notes} net={net}
               busy={busy} run={run} onStart={startDemo} canStart={!!seller} />
           )}
         </Phone>
@@ -119,7 +118,7 @@ export default function LiveDemo() {
             : <p className="text-sm text-muted">"Start fresh demo" dabao ya dashboard se koi invoice choose karo.</p>}
         </div>
       </div>
-    </Section>
+    </>
   )
 }
 
@@ -147,7 +146,7 @@ function PhoneLoading() {
 }
 
 /* ---------------- BUYER ---------------- */
-function BuyerScreen({ inv, items, sellerName, openDispute, notes, busy, run, onStart, canStart }) {
+function BuyerScreen({ inv, items, sellerName, openDispute, notes, net, busy, run, onStart, canStart }) {
   const [mode, setMode] = useState(null) // 'dispute' | 'reject'
   useEffect(() => { setMode(null) }, [inv?.id, inv?.status])
 
@@ -176,7 +175,6 @@ function BuyerScreen({ inv, items, sellerName, openDispute, notes, busy, run, on
     </motion.div>
   )
 
-  const net = Number(inv.total) - notes.reduce((s, c) => s + Number(c.total), 0)
   const check = gstCheck(inv)
   const canAct = ['viewed', 'pending', 'corrected'].includes(inv.status)
 
@@ -200,8 +198,8 @@ function BuyerScreen({ inv, items, sellerName, openDispute, notes, busy, run, on
 
       {notes.map(c => (
         <motion.div key={c.id} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="rounded-2xl border border-ok/30 bg-ok-soft p-3 text-sm">
-          <div className="font-bold text-ok">🧾 Credit note {c.cn_no} mila</div>
-          <div>{c.reason}: −{inr(c.total)}</div>
+          <div className="font-bold text-ok">🧾 {c.kind === 'debit' ? 'Debit' : 'Credit'} note {c.cn_no} mila</div>
+          <div>{c.reason}: {c.kind === 'debit' ? '+' : '−'}{inr(c.total)}</div>
           <div className="mt-1 font-bold">Ab payable: {inr(net)}</div>
         </motion.div>
       ))}

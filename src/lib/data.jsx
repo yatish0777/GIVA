@@ -3,7 +3,7 @@ import { supabase, supabaseConfigured } from './supabase'
 
 const DataCtx = createContext(null)
 
-const empty = { businesses: [], invoices: [], items: [], disputes: [], creditNotes: [], requests: [], history: [] }
+const empty = { businesses: [], invoices: [], items: [], disputes: [], creditNotes: [], requests: [], history: [], stock: [] }
 
 export function DataProvider({ children }) {
   const [data, setData] = useState(empty)
@@ -16,7 +16,7 @@ export function DataProvider({ children }) {
   const load = useCallback(async () => {
     if (!supabaseConfigured) { setError('Supabase is not configured'); setLoading(false); return }
     const q = (t, order = 'created_at') => supabase.from(t).select('*').order(order, { ascending: false })
-    const [b, i, it, d, c, r, h] = await Promise.all([
+    const [b, i, it, d, c, r, h, s] = await Promise.all([
       supabase.from('businesses').select('*').order('name'),
       q('invoices'),
       supabase.from('invoice_items').select('*'),
@@ -24,12 +24,13 @@ export function DataProvider({ children }) {
       q('credit_notes'),
       q('invoice_requests'),
       supabase.from('status_history').select('*').order('created_at', { ascending: true }),
+      q('stock_movements'),
     ])
-    const err = [b, i, it, d, c, r, h].find(x => x.error)
+    const err = [b, i, it, d, c, r, h, s].find(x => x.error)
     if (err) { setError(err.error.message); setLoading(false); return }
     setData({
       businesses: b.data, invoices: i.data, items: it.data, disputes: d.data,
-      creditNotes: c.data, requests: r.data, history: h.data,
+      creditNotes: c.data, requests: r.data, history: h.data, stock: s.data,
     })
     setError(null)
     setLoading(false)
@@ -44,7 +45,7 @@ export function DataProvider({ children }) {
     load()
     if (!supabaseConfigured) return
     const ch = supabase.channel('giva-live')
-    for (const table of ['invoices', 'disputes', 'credit_notes', 'invoice_requests']) {
+    for (const table of ['invoices', 'disputes', 'credit_notes', 'invoice_requests', 'stock_movements', 'businesses']) {
       ch.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
         refresh()
         listeners.current.forEach(fn => fn({ table, payload }))

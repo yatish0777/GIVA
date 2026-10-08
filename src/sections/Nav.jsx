@@ -5,7 +5,7 @@ import { Logo } from '../components/ui'
 const links = [
   ['#problem', 'Problem'],
   ['#how', 'How it works'],
-  ['#demo', 'Live demo'],
+  ['#demo', 'Live MVP'],
   ['#idea', 'Why GIVA'],
   ['#contact', 'Contact'],
 ]
@@ -26,7 +26,7 @@ export default function Nav() {
           {links.map(([href, label]) => (
             <a key={href} href={href} className={`text-sm font-semibold transition ${scrolled ? 'text-muted hover:text-ink' : 'text-white/80 hover:text-white'}`}>{label}</a>
           ))}
-          <a href="#demo" className="btn-accent">Try live demo</a>
+          <a href="#demo" className="btn-accent">Try the MVP</a>
         </div>
         <button className={`md:hidden ${scrolled || open ? 'text-ink' : 'text-white'}`} onClick={() => setOpen(o => !o)} aria-label="Menu">
           {open ? <X /> : <Menu />}
